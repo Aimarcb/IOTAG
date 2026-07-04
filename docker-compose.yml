@@ -1,0 +1,53 @@
+services:
+  # 1. Base de Datos Relacional
+  db:
+    image: postgres:15
+    container_name: nethome_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. Cerebro IoT (Broker MQTT)
+  mqtt_broker:
+    image: eclipse-mosquitto:2
+    container_name: nethome_mqtt
+    restart: always
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      # Mapea tu archivo local de configuración hacia el interior del contenedor
+      - ./mosquitto/config:/mosquitto/config
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+
+  # 3. El Backend en Node.js
+  backend:
+    build: ./backend
+    container_name: nethome_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      # Conexión por red interna de Docker usando los nombres de los servicios
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASSWORD=${POSTGRES_PASSWORD}
+      - DB_NAME=${POSTGRES_DB}
+      - MQTT_HOST=mqtt_broker
+    depends_on:
+      - db
+      - mqtt_broker
+
+# Volúmenes gestionados por Docker para persistencia de datos
+volumes:
+  postgres_data:
+  mosquitto_data:
+  mosquitto_log:
