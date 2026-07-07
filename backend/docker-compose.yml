@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # 1. Base de Datos PostgreSQL (Imagen oficial, nada de Alpine)
+  postgres_db:
+    image: postgres:15
+    container_name: nethome_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: nethome_user
+      POSTGRES_PASSWORD: nethome_password
+      POSTGRES_DB: nethome_iot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. Broker MQTT (Mosquitto)
+  mqtt_broker:
+    image: eclipse-mosquitto:2
+    container_name: nethome_mosquitto
+    restart: always
+    ports:
+      - "1883:1883"
+    volumes:
+      # Apunta a tu nueva carpeta para leer la configuración
+      - ./configuracion_mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  # 3. Capa de API (FastAPI) para las peticiones HTTP de Kotlin
+  web_api:
+    build: .
+    container_name: nethome_api
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres_db
+      - mqtt_broker
+    env_file:
+      - .env
+
+  # 4. Capa de IoT (Worker MQTT) en segundo plano para escuchar al ESP32
+  mqtt_worker:
+    build: .
+    container_name: nethome_mqtt_worker
+    restart: always
+    # Ejecuta el script del módulo mqtt para guardar datos sin bloquear la API
+    command: python -m mqtt.oyente_mqtt
+    depends_on:
+      - postgres_db
+      - mqtt_broker
+    env_file:
+      - .env
+
+volumes:
+  # Volumen persistente para que los datos no se borren si reinicias el servidor
+  postgres_data:

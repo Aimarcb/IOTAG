@@ -1,17 +1,21 @@
-# 1. Traemos un entorno ligero de Python
+# Usa una imagen oficial de Python ligera
 FROM python:3.11-slim
 
-# 2. Creamos la carpeta de trabajo dentro del contenedor
+# Directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# 3. Copiamos el archivo de dependencias (¡Aquí sí usamos requirements.txt!)
-COPY requirements.txt .
+# Instala dependencias del sistema necesarias para PostgreSQL (Psycopg2)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# 4. Instalamos las librerías de Python sin guardar caché para ahorrar espacio
+# Copia e instala los requerimientos de librerías
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 5. Copiamos el resto del código
+# Copia el resto de las carpetas (api, mqtt, base_datos, ia...)
 COPY . .
 
-# 6. Comando por defecto (aunque lo sobrescribiremos en desarrollo para el auto-recargado)
+# Por defecto, arranca tu API de FastAPI
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
