@@ -35,13 +35,15 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # Conexión por red interna de Docker usando los nombres de los servicios
+      - NODE_ENV=production
       - DB_HOST=db
       - DB_PORT=5432
       - DB_USER=${POSTGRES_USER}
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - DB_NAME=${POSTGRES_DB}
       - MQTT_HOST=mqtt_broker
+      - MQTT_PORT=1883
+      - PORT=3000
     depends_on:
       - db
       - mqtt_broker
