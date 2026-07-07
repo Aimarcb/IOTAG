@@ -1,11 +1,15 @@
-import paho.mqtt.client as mqtt
+import os
 import time
 
-MQTT_BROKER = "mqtt_broker" 
-MQTT_PORT = 1883
-MQTT_TOPIC = "nethome/energia/#"
+import paho.mqtt.client as mqtt
 
-# En la versión 2.0+, la función on_connect recibe 'reason_code' y 'properties'
+from database.database import init_db, save_mqtt_message
+
+MQTT_BROKER = os.getenv("MQTT_BROKER_HOST", "mqtt_broker")
+MQTT_PORT = int(os.getenv("MQTT_BROKER_PORT", "1883"))
+MQTT_TOPIC = os.getenv("MQTT_TOPIC", "nethome/energia/#")
+
+
 def on_connect(client, userdata, flags, reason_code, properties):
     if reason_code == 0:
         print("✅ [Worker] Conectado exitosamente a Mosquitto")
@@ -14,15 +18,24 @@ def on_connect(client, userdata, flags, reason_code, properties):
     else:
         print(f"❌ [Worker] Error de conexión, código: {reason_code}")
 
+
 def on_message(client, userdata, msg):
-    print(f"📥 [Worker] Mensaje recibido en {msg.topic}: {msg.payload.decode()}")
+    try:
+        payload_text = msg.payload.decode("utf-8", errors="ignore")
+        save_mqtt_message(topic=msg.topic, payload=payload_text)
+        print(f"📥 [Worker] Mensaje recibido en {msg.topic}: {payload_text}")
+    except Exception as exc:
+        print(f"❌ [Worker] No se pudo guardar el mensaje: {exc}")
+
 
 def iniciar_worker():
     print("🚀 Iniciando Worker MQTT en segundo plano...")
-    
-    # ⚠️ AQUÍ ESTÁ LA MAGIA QUE ARREGLA EL ERROR
+
+    while not init_db():
+        print("⏳ Esperando a que la base de datos esté disponible...")
+        time.sleep(3)
+
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, "nethome_backend_worker")
-    
     client.on_connect = on_connect
     client.on_message = on_message
 
@@ -30,11 +43,12 @@ def iniciar_worker():
         try:
             client.connect(MQTT_BROKER, MQTT_PORT, 60)
             break
-        except Exception as e:
-            print(f"⏳ Esperando al broker MQTT... ({e})")
+        except Exception as exc:
+            print(f"⏳ Esperando al broker MQTT... ({exc})")
             time.sleep(3)
 
     client.loop_forever()
+
 
 if __name__ == "__main__":
     iniciar_worker()
