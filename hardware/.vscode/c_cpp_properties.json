@@ -10,6 +10,8 @@
             "includePath": [
                 "C:/IOTAG/hardware/include",
                 "C:/IOTAG/hardware/src",
+                "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
+                "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/Network/src",
                 "C:/IOTAG/hardware/.pio/libdeps/esp32dev/DHT sensor library",
                 "C:/IOTAG/hardware/.pio/libdeps/esp32dev/Adafruit Unified Sensor",
                 "C:/IOTAG/hardware/.pio/libdeps/esp32dev/PubSubClient/src",
@@ -272,7 +274,6 @@
                 "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/Insights/src",
                 "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/LittleFS/src",
                 "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/NetBIOS/src",
-                "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/Network/src",
                 "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/NetworkClientSecure/src",
                 "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/OpenThread/src",
                 "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/PPP/src",
@@ -288,7 +289,6 @@
                 "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/USB/src",
                 "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/Update/src",
                 "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/WebServer/src",
-                "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
                 "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/WiFiProv/src",
                 "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                 ""
@@ -298,6 +298,8 @@
                 "path": [
                     "C:/IOTAG/hardware/include",
                     "C:/IOTAG/hardware/src",
+                    "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
+                    "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/Network/src",
                     "C:/IOTAG/hardware/.pio/libdeps/esp32dev/DHT sensor library",
                     "C:/IOTAG/hardware/.pio/libdeps/esp32dev/Adafruit Unified Sensor",
                     "C:/IOTAG/hardware/.pio/libdeps/esp32dev/PubSubClient/src",
@@ -560,7 +562,6 @@
                     "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/Insights/src",
                     "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/LittleFS/src",
                     "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/NetBIOS/src",
-                    "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/Network/src",
                     "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/NetworkClientSecure/src",
                     "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/OpenThread/src",
                     "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/PPP/src",
@@ -576,7 +577,6 @@
                     "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/USB/src",
                     "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/Update/src",
                     "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/WebServer/src",
-                    "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
                     "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/WiFiProv/src",
                     "C:/Users/gaelc/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                     ""
