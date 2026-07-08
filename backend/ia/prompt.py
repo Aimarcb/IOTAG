@@ -20,7 +20,7 @@ def generar_prompt(temperatura,luz,movimiento, orden_usuario):
     REGLA ABSOLUTA: Responde ÚNICAMENTE con un objeto JSON válido. No uses texto plano, ni introducciones, ni bloques de código markdown (```json).
     Estructura exacta del JSON:
     {{
-      "respuesta_altavoz": "Una frase corta, inteligente y natural que explique qué has hecho basándote en los datos.",
+      "respuesta_texto": "Una frase corta, inteligente y natural que explique qué has hecho basándote en los datos.",
       "rele_luz": "ON" o "OFF",
     }}
     """

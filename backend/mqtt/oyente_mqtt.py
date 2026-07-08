@@ -44,7 +44,7 @@ def iniciar_worker():
             client.connect(MQTT_BROKER, MQTT_PORT, 60)
             break
         except Exception as exc:
-            print(f"⏳ Esperando al broker MQTT... ({exc})")
+            print(f" Esperando al broker MQTT... ({exc})")
             time.sleep(3)
 
     client.loop_forever()

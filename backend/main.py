@@ -2,15 +2,40 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
+import paho.mqtt.client as mqtt
 from typing import List
+from pydantic import BaseModel
+from ia.ia_manager import procesar_ia
 
 from database.database import get_db, init_db
 from database.models import MQTTReading
 
+""""" 
+añadir routers luego para poder hacer una modularizacion de los endponts mediante routers
+from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("api/...")
+"""
+
+nethome_mqtt_client = mqtt.Client()
+nethome_mqtt_client.connect("nethome_mosquitto", 1883)
+nethome_mqtt_client.loop_start()
+
+class OrdenUsuario(BaseModel):
+    mensaje: str
+
+def enviar_orden(topic, accion):
+    if accion in ["ON","OFF"]:
+        nethome_mqtt_client.publish(topic, accion)
+    else:
+        print(f"Acción inválida: {accion}. Solo se permiten 'ON' o 'OFF'.")
+
+
 app = FastAPI(
     title="NetHome IoT API",
     description="API para la gestión de dispositivos IoT y lectura de datos de energía",
-    version="1.0.0",
 )
 
 app.add_middleware(
@@ -28,22 +53,15 @@ def startup_event():
 @app.get("/")
 def read_root():
     return {"message": "NetHome API activa"}
-"""""
-## Código que añadirá tu hermano en su API:
-from fastapi import APIRouter
-from ia.ia_manager import procesar_orden_inteligente # <-- Importa tu función
 
-router = APIRouter()
-
-@router.get("/ia/orden")
-def api_consultar_ia(texto: str):
+@app.post("/api/ia/procesar_orden")
+def consultar_ia(mensaje: OrdenUsuario):
     # Llama a tu cerebro pasándole la frase que llega del móvil
-    decision = procesar_orden_inteligente(texto)
-    
-    # Aquí tu hermano añadirá el código para mandar el MQTT al ESP32
-    # basado en lo que tú has decidido (decision['rele_luz'], etc.)
-    
-    return decision"""
+    decision = procesar_ia(mensaje)
+ 
+    enviar_orden("nethome/accion/luz", decision.get("rele_luz"))
+
+    return {"respuesta": decision.get("respuesta_texto")}
 
 @app.get("/api/temperatura/actual")
 def obtener_temperatura_actual(db: Session = Depends(get_db)):

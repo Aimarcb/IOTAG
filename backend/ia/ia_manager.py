@@ -1,6 +1,6 @@
 import os 
 import json
-from prompt import generar_prompt
+from ia.prompt import generar_prompt
 import psycopg2
 import google.generativeai as genai
 
@@ -71,19 +71,4 @@ def procesar_ia(orden):
     except Exception as e:
         print(f"Error al procesar la IA: {e}")
         return {"error": "No se pudo procesar la orden con la IA."}
-        
-        # --- BLOQUE DE PRUEBAS TEMPORAL ---
-# Esto solo se ejecuta si lanzas este archivo directamente
-if __name__ == "__main__":
-    print("🚀 Iniciando prueba aislada del Cerebro IA...")
-    try:
-        # Simulamos que el usuario manda este texto desde el móvil
-        resultado = procesar_ia("Hace un frío terrible aquí dentro y está oscureciendo.")
-        
-        print("\n✅ ¡CONEXIÓN EXITOSA CON GEMINI Y POSTGRES!")
-        print("--------------------------------------------")
-        print(f"🔊 Altavoz: {resultado['respuesta_altavoz']}")
-        print(f"💡 Luz: {resultado['rele_luz']}")
-        
-    except Exception as e:
-        print(f"❌ La prueba ha fallado: {e}")
+ 
