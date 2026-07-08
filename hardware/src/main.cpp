@@ -16,7 +16,10 @@ PubSubClient client(espClient);
 
 // Variables para no usar delay() y no bloquear el MQTT
 unsigned long ultimoMuestreo = 0;
-const long intervalo = 1000; // Enviar datos cada 1 segundo
+const long intervalo = 10000; // Enviar datos cada 10 segundos
+int ultimoEstadoMov = -1;    // Empezamos en -1 para que obligatoriamente mande el primer dato al arrancar
+unsigned long ultimoTiempoMovimiento = 0; // Guarda el milisegundo del último cambio real
+
 float leerTemp();
 int leerLuz();
 int detectarMovimiento();
@@ -92,6 +95,18 @@ void loop()
 
   // 2. Leemos y enviamos datos cada 5 segundos (sin usar delay!)
   unsigned long tiempoActual = millis();
+  int estadoMov = detectarMovimiento();
+
+  if (estadoMov != ultimoEstadoMov && (millis() - ultimoTiempoMovimiento >= 2500))
+  {
+    ultimoTiempoMovimiento = millis();
+    ultimoEstadoMov = estadoMov;
+
+    String stringMOV = String(estadoMov);
+    client.publish("nethome/habitacion/presencia", stringMOV.c_str());
+    Serial.print("[MQTT] ¡Cambio de estado! Presencia actual: ");
+    Serial.println(estadoMov);
+  }
 
   if (tiempoActual - ultimoMuestreo >= intervalo)
   {
@@ -100,7 +115,6 @@ void loop()
     // --- LEER SENSORES ---
     float temperaturaC = leerTemp();
     int intensidadLuz = leerLuz();
-    int deteccionMOV = detectarMovimiento();
     // --- IMPRIMIR EN CONSOLA LOCAL ---
     Serial.print("Temperatura: ");
     Serial.print(temperaturaC);
@@ -108,27 +122,16 @@ void loop()
     Serial.print("intensidad de la luz: ");
     Serial.print(intensidadLuz);
     Serial.print(" %");
-    if (deteccionMOV)
-    {
-      Serial.println(" | Movimiento detectado");
-    }
-    else
-    {
-      Serial.println(" | No hay movimiento");
-    }
     // --- ENVIAR POR MQTT (CONVERTIR NÚMEROS A TEXTO) ---
     // PubSubClient solo envía texto (char array), así que convertimos los números
     // --- ENVIAR POR MQTT (MODO SEGURO Y AUTOMÁTICO) ---
     // Usamos String para que el ESP32 calcule el tamaño él
-    String stringTemp = String(temperaturaC);
+    String stringTemp = String(temperaturaC, 1);
     String stringIntensidad = String(intensidadLuz);
-    String stringMOV = String(deteccionMOV);
+
     // El comando .c_str() lo empaqueta perfectamente para el MQTT sin desbordar nada
     client.publish("nethome/habitacion/temperatura", stringTemp.c_str());
     client.publish("nethome/habitacion/intensidad", stringIntensidad.c_str());
-    client.publish("nethome/habitacion/presencia", stringMOV.c_str());
-
-    Serial.println("Datos enviados por MQTT con éxito.");
   }
 }
 
