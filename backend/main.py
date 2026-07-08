@@ -22,10 +22,10 @@ router = APIRouter()
 nethome_mqtt_client = mqtt.Client()
 nethome_mqtt_client.connect("nethome_mosquitto", 1883)
 nethome_mqtt_client.loop_start()
-
+#validacion de datos para transforma en string la peticion
 class OrdenUsuario(BaseModel):
     mensaje: str
-
+#envio la accion al broker mqtt
 def enviar_orden(topic, accion):
     if accion in ["ON","OFF"]:
         nethome_mqtt_client.publish(topic, accion)
