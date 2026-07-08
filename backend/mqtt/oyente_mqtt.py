@@ -7,7 +7,7 @@ from database.database import init_db, save_mqtt_message
 
 MQTT_BROKER = os.getenv("MQTT_BROKER_HOST", "mqtt_broker")
 MQTT_PORT = int(os.getenv("MQTT_BROKER_PORT", "1883"))
-MQTT_TOPIC = os.getenv("MQTT_TOPIC", "nethome/energia/#")
+MQTT_TOPIC = os.getenv("MQTT_TOPIC", "nethome/#")
 
 
 def on_connect(client, userdata, flags, reason_code, properties):

@@ -45,7 +45,6 @@ def get_db() -> Generator[Session, None, None]:
 def _parse_payload(payload: str | bytes | bytearray) -> tuple[str | None, float | None, str | None]:
     if isinstance(payload, (bytes, bytearray)):
         payload = payload.decode("utf-8", errors="ignore")
-
     text = str(payload or "").strip()
     if not text:
         return None, None, None
@@ -56,16 +55,13 @@ def _parse_payload(payload: str | bytes | bytearray) -> tuple[str | None, float 
 
     try:
         import json
-
         data = json.loads(text)
         if isinstance(data, dict):
-            device_id = data.get("device_id") or data.get("device") or data.get("id")
-            unit = data.get("unit") or data.get("medida")
-            for key in ("value", "power", "current", "voltage", "energy", "consumption", "reading", "measurement"):
-                value = data.get(key)
-                if isinstance(value, (int, float)):
-                    parsed_value = float(value)
-                    break
+            device_id = data.get("device_id")
+            unit = data.get("unit")
+            value = data.get("value")
+            if isinstance(value, (int, float)):
+                parsed_value = float(value)
     except (TypeError, ValueError):
         pass
 
