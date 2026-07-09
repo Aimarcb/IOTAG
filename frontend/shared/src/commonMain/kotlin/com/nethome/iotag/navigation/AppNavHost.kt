@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.nethome.iotag.ui.screens.DashboardScreen
+import com.nethome.iotag.ui.screens.SettingsScreen
 
 @Composable
 fun AppNavHost(
@@ -18,7 +19,10 @@ fun AppNavHost(
         modifier = modifier
     ) {
         composable<DashboardRoute> {
-            DashboardScreen()
+            DashboardScreen(Modifier)
+        }
+        composable<SettingsRoute> {
+            SettingsScreen()
         }
     }
 }
