@@ -8,7 +8,8 @@
 #define PIN_MOV 23           // Pin digital para el
 #define PIN_NTC 35           // Pin analógico (ADC1) para la temperatura
 #define RES_FIJA 9830.0      // Resistencia fija de 10k ohmios para el divisor de tensión del NTC
-#define COEFICIENTE_B 3950.0 // Coeficiente Beta del NTC
+#define COEFICIENTE_B 3950.0 // Coeficiente Beta del 
+#define PIN_LUZ 2
 
 // --- OBJETOS DE RED ---
 WiFiClient espClient;
@@ -23,6 +24,31 @@ unsigned long ultimoTiempoMovimiento = 0; // Guarda el milisegundo del último c
 float leerTemp();
 int leerLuz();
 int detectarMovimiento();
+
+//funcion para recibir datos del broker mqtt
+void callback(char*topic, byte*payload, unsigned int length){
+  
+  //Estandar en c++ para transformar el mensaje dividido en bytes a string  
+  String mensaje = "";
+  for(int i=0; i<length; i++){
+    mensaje += (char)payload[i];
+  }
+  Serial.print("Mensaje recibido en el topic: ");
+  Serial.println(topic);//topic es la direccion del memoria donde se encuentra el mensaje no el valor
+  Serial.print("Mensaje recibido:");
+  Serial.println(mensaje);
+
+  //usamo strcmp para poder comparar 2 textos en c++ ya que en python por ejemplo se puede hacer hola == hola pero en c++ no se puede hacer eso
+  if (strcmp(topic, "nethome/accion/luz") == 0){
+    if (mensaje == "ON"){
+      digitalWrite(PIN_LUZ, HIGH);
+      Serial.println("Luz encendida");
+    } else if (mensaje == "OFF"){
+      digitalWrite(PIN_LUZ, LOW);
+      Serial.println("Luz apagada");
+    }
+  }
+}
 
 // Función para conectar al WiFi
 void setup_wifi()
@@ -59,6 +85,8 @@ void reconnect()
     if (client.connect(clientId.c_str()))
     {
       Serial.println("¡Conectado al servidor MQTT");
+      client.subscribe("nethome/accion/luz"); // Nos suscribimos al topic de la luz
+      Serial.println("Conectado al broker");
     }
     else
     {
@@ -78,10 +106,13 @@ void setup()
   pinMode(PIN_MOV, INPUT);
   pinMode(PIN_LDR, INPUT);
   pinMode(PIN_NTC, INPUT);
+  pinMode(PIN_LUZ, OUTPUT);
 
   // Iniciamos WiFi y configuramos el servidor MQTT
   setup_wifi();
+ //para la prueba pongo la ip local del ordenador donde esta el broker 
   client.setServer(MQTT_SERVER, MQTT_PORT);
+  client.setCallback(callback); // Le pasas el "nombre" de tu función
 }
 
 void loop()
@@ -91,7 +122,7 @@ void loop()
   {
     reconnect();
   }
-  client.loop(); // Esto es vital para que PubSubClient procese los datos
+  client.loop(); // El vigilante que llama al callback si entra un mensaje!
 
   // 2. Leemos y enviamos datos cada 5 segundos (sin usar delay!)
   unsigned long tiempoActual = millis();
@@ -104,7 +135,7 @@ void loop()
 
     String stringMOV = String(estadoMov);
     client.publish("nethome/habitacion/presencia", stringMOV.c_str());
-    Serial.print("[MQTT] ¡Cambio de estado! Presencia actual: ");
+    Serial.print("¡Cambio de estado! Presencia actual: ");
     Serial.println(estadoMov);
   }
 
@@ -121,7 +152,7 @@ void loop()
     Serial.println(" °C");
     Serial.print("intensidad de la luz: ");
     Serial.print(intensidadLuz);
-    Serial.print(" %");
+    Serial.println(" %");
     // --- ENVIAR POR MQTT (CONVERTIR NÚMEROS A TEXTO) ---
     // PubSubClient solo envía texto (char array), así que convertimos los números
     // --- ENVIAR POR MQTT (MODO SEGURO Y AUTOMÁTICO) ---
@@ -167,7 +198,7 @@ int leerLuz()
   }
   int nivelLuzBruto = sumaLuz / 10; // Sacamos la media perfecta
 
-  int intensidadLuz = map(nivelLuzBruto, 1000, 4050, 0, 100); // Convertimos a porcentaje
+  int intensidadLuz = map(nivelLuzBruto, 100, 4050, 0, 100); // Convertimos a porcentaje
 
   intensidadLuz = constrain(intensidadLuz, 0, 100); // Aseguramos que esté entre 0 y 100
   return intensidadLuz;
