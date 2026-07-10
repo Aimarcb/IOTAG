@@ -7,7 +7,7 @@ import google.generativeai as genai
 #1. Cargamos la api secreta de Google desde el .env
 API_KEY = os.environ.get("GEMINI_API_KEY")
 genai.configure(api_key= API_KEY)
-modelo = genai.GenerativeModel("gemini-3.5-flash")
+modelo = genai.GenerativeModel('gemini-3.1-flash-lite')
 
 # 2. Datos de conexión a la Base de Datos (sacados del .env automáticamente)
 DB_HOST = "postgres_db"  # Nombre del contenedor en el docker-compose
@@ -59,6 +59,7 @@ def procesar_ia(orden):
         movimiento = sensores['presencia'],
         orden_usuario = orden
     ) 
+    import os
 
     try:
         respuesta = modelo.generate_content(
