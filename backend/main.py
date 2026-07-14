@@ -6,11 +6,12 @@ import paho.mqtt.client as mqtt
 from typing import List
 from pydantic import BaseModel
 from ia.ia_manager import procesar_ia
+from datetime import datetime, timedelta
 
 from database.database import get_db, init_db
 from database.models import MQTTReading
 
-""""" 
+""" 
 añadir routers luego para poder hacer una modularizacion de los endponts mediante routers
 from fastapi import APIRouter
 
@@ -63,29 +64,83 @@ def consultar_ia(mensaje: OrdenUsuario):
 
     return {"respuesta": decision.get("respuesta_texto")}
 
+@app.get("/api/electricidad/actual")
+def obtener_consumo_actual(db: Session = Depends(get_db)):
+    # 1. Obtener la última lectura (la actual)
+    lectura_actual = (
+        db.query(MQTTReading)
+        .filter(MQTTReading.topic == "nethome/energia/potencia")
+        .order_by(desc(MQTTReading.received_at))
+        .first()
+    )
+
+    if not lectura_actual:
+        raise HTTPException(status_code=404, detail="No hay lecturas disponibles")
+
+    # 2. Obtener la lectura de hace 1 hora aprox
+    una_hora_antes = datetime.utcnow() - timedelta(hours=1)
+    
+    lectura_pasada = (
+        db.query(MQTTReading)
+        .filter(MQTTReading.topic == "nethome/energia/potencia")
+        .filter(MQTTReading.received_at <= una_hora_antes) # Buscamos una lectura antigua
+        .order_by(desc(MQTTReading.received_at))
+        .first()
+    )
+
+    # 3. Cálculo de tendencia
+    tendencia_str = "0% hoy"
+    if lectura_pasada and lectura_pasada.parsed_value > 0:
+        variacion = ((lectura_actual.parsed_value - lectura_pasada.parsed_value) / lectura_pasada.parsed_value) * 100
+        signo = "+" if variacion > 0 else ""
+        tendencia_str = f"{signo}{round(variacion, 1)}% hoy"
+
+    return {
+        "potencia_kw": round(lectura_actual.parsed_value, 2),
+        "tendencia": tendencia_str,
+        "unidad": lectura_actual.unit or "kW",
+        "fecha": lectura_actual.received_at
+    }
+
 @app.get("/api/temperatura/actual")
 def obtener_temperatura_actual(db: Session = Depends(get_db)):
     """
-    Devuelve la última lectura de temperatura registrada en la base de datos.
-    Filtra los tópicos que contengan datos ambientales.
+    Devuelve la última lectura de temperatura registrada y su diferencia con ayer.
     """
-    # Buscamos el último registro cuyo tópico sea el del sensor ambiental
-    lectura = (
+    # 1. Buscamos la temperatura actual
+    lectura_actual = (
         db.query(MQTTReading)
         .filter(MQTTReading.topic.like("%temperatura%"))
         .order_by(desc(MQTTReading.received_at))
         .first()
     )
     
-    if not lectura:
+    if not lectura_actual:
         raise HTTPException(status_code=404, detail="No hay lecturas ambientales disponibles todavía")
+
+    # 2. Buscamos la temperatura de hace exactamente 24 horas
+    un_dia_antes = datetime.utcnow() - timedelta(days=1)
+    
+    lectura_ayer = (
+        db.query(MQTTReading)
+        .filter(MQTTReading.topic.like("%temperatura%"))
+        .filter(MQTTReading.received_at <= un_dia_antes)
+        .order_by(desc(MQTTReading.received_at))
+        .first()
+    )
+
+    tendencia_str = "Igual que ayer"
+    if lectura_ayer:
+        diferencia = lectura_actual.parsed_value - lectura_ayer.parsed_value
+        if abs(diferencia) >= 0.5: 
+            signo = "+" if diferencia > 0 else ""
+            tendencia_str = f"{signo}{round(diferencia, 1)}°C que ayer"
         
     return {
-        "dispositivo": lectura.device_id or "Desconocido",
-        "topico": lectura.topic,
-        "valor": lectura.parsed_value,
-        "unidad": lectura.unit or "°C",
-        "fecha": lectura.received_at
+        "temperatura": round(lectura_actual.parsed_value, 1),
+        "tendencia": tendencia_str,
+        "unidad": lectura_actual.unit or "°C",
+        "fecha": lectura_actual.received_at
     }
 
 @app.get("/api/temperatura/historial")

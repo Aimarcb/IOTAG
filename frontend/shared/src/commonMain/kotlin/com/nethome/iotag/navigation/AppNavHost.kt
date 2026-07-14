@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.nethome.iotag.ui.screens.DashboardScreen
+import com.nethome.iotag.ui.screens.EnergyScreen
 import com.nethome.iotag.ui.screens.SettingsScreen
 
 @Composable
@@ -23,6 +24,9 @@ fun AppNavHost(
         }
         composable<SettingsRoute> {
             SettingsScreen()
+        }
+        composable<EnergyRoute> {
+            EnergyScreen()
         }
     }
 }

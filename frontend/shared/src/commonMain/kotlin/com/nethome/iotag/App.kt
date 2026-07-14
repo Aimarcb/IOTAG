@@ -2,6 +2,7 @@ package com.nethome.iotag
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.EnergySavingsLeaf
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
@@ -22,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.nethome.iotag.navigation.AppNavHost
 import com.nethome.iotag.navigation.DashboardRoute
+import com.nethome.iotag.navigation.EnergyRoute
 import com.nethome.iotag.navigation.NavItem
 import com.nethome.iotag.navigation.SettingsRoute
 import com.nethome.iotag.ui.components.EcoHomeDarkColors
@@ -40,6 +42,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
     val navItems = listOf(
         NavItem(route = DashboardRoute, label = "Panel", icon = Icons.Default.Home),
+        NavItem(route = EnergyRoute, label = "Energía", icon = Icons.Default.EnergySavingsLeaf),
         NavItem(route = SettingsRoute, label = "Configuración", icon = Icons.Default.Settings)
     )
 

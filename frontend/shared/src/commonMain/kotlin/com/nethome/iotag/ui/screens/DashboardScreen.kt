@@ -1,24 +1,23 @@
 package com.nethome.iotag.ui.screens
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.TempleHindu
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Thermostat
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,77 +28,118 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.nethome.iotag.ui.components.NetHomeCard
+import com.nethome.iotag.ui.components.NetHomeStatusCard
+import com.nethome.iotag.ui.components.VoiceAssistantCard
 import com.nethome.iotag.ui.viewmodels.DashboardViewModel
+import com.nethome.iotag.utils.rememberSpeechRecognizer
 
 @Composable
 fun DashboardScreen(modifier: Modifier = Modifier) {
     val viewModel = remember { DashboardViewModel() }
-    val temperatura by viewModel.uiState.collectAsState()
+    val data by viewModel.uiState.collectAsState()
+
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
         viewModel.update()
     }
 
-    Column(
-        modifier = modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ){
-        Row() {
-            NetHomeCard(
-                title = "CONSUMO",
-                value = "1.2 kW",
-                icon = Icons.Default.Bolt,
-                subtitle = "↘ -5% hoy",
-                accentColor = Color(0xFF34D399),
-                valueColor = Color(0xFF34D399),
-                modifier = Modifier.weight(1f)
-            )
+    val startSpeechRecognition = rememberSpeechRecognizer { textoReconocido ->
+        viewModel.procesarComandoVoz(textoReconocido)
+    }
 
-            NetHomeCard(
-                title = "CLIMA",
-                value = "22 °C",
-                icon = Icons.Default.Thermostat,
-                subtitle = "Interior",
-                accentColor = Color(0xFFFBBF24),
-                modifier = Modifier.weight(1f),
-                trailingContent = {
-                    CircularProgressIndicator(
-                        progress = { 0.7f },
-                        color = Color(0xFFFBBF24),
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                        modifier = Modifier.size(32.dp)
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Panel Principal",
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.align(Alignment.Start)
+        )
+        Spacer(Modifier.height(16.dp))
+
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    NetHomeCard(
+                        title = "CONSUMO",
+                        value = "${data.consumoKw} ${data.unidadConsumo}",
+                        icon = Icons.Default.Bolt,
+                        subtitle = data.tendenciaConsumo,
+                        accentColor = Color(0xFF34D399),
+                        valueColor = Color(0xFF34D399),
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    NetHomeCard(
+                        title = "CLIMA",
+                        value = "${data.temperatura} ${data.unidadTemperatura}",
+                        icon = Icons.Default.Thermostat,
+                        subtitle = data.tendenciaTemperatura,
+                        accentColor = Color(0xFFFBBF24),
+                        modifier = Modifier.weight(1f),
+                        trailingContent = {
+                            CircularProgressIndicator(
+                                progress = { 0.7f },
+                                color = Color(0xFFFBBF24),
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
                     )
                 }
-            )
+                NetHomeStatusCard(
+                    label = "ESTADO DEL SISTEMA",
+                    title = "Desarmado",
+                    icon = Icons.Default.LockOpen,
+                    statusText = "Desarmado",
+                    statusColor = Color(0xFF9CA3AF)
+                )
+            }
         }
+        Spacer(Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(24.dp))
+        VoiceAssistantCard(
+            suggestions = listOf(
+                "Enciende el salón",
+                "¿Qué temperatura hace?",
+                "Cierra todo"
+            ),
+            onMicClick = {
+                startSpeechRecognition()
+            },
+            onSuggestionClick = { suggestion ->
+                viewModel.procesarComandoVoz(suggestion)
+            },
+            modifier = Modifier.padding(top = 12.dp)
+        )
 
-        AnimatedContent(targetState = temperatura, label = "temp_anim") { temp ->
+        if (data.mensajeIA.isNotEmpty()) {
             Text(
-                text = "$temp °C",
-                style = MaterialTheme.typography.displayLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                text = data.mensajeIA,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
             )
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Button(
-            onClick = { viewModel.update() },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        ) {
-            Icon(Icons.Default.Refresh, contentDescription = "Actualizar")
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Actualizar Datos")
         }
     }
 }

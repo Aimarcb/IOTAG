@@ -46,7 +46,7 @@ def obtener_datos_db():
         print(f"Error al obtener datos de la base de datos: {e}")
  
     
-def procesar_ia(orden):
+def procesar_ia(mensaje_usuario: str):
 
     sensores = obtener_datos_db()
         
@@ -54,10 +54,10 @@ def procesar_ia(orden):
         return "No se pudieron obtener datos de los sensores."
         
     instrucciones = generar_prompt(
-        temperatura = sensores['temperatura'],
-        luz = sensores['intensidad'],
-        movimiento = sensores['presencia'],
-        orden_usuario = orden
+        temperatura = sensores.get('temperatura', 20.0),
+        luz = sensores.get('intensidad', 50.0),
+        movimiento = sensores.get('presencia', 0),
+        orden_usuario = mensaje_usuario
     ) 
     import os
 

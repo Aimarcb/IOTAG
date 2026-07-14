@@ -1,5 +1,6 @@
 package com.nethome.iotag.ui.components
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -19,12 +20,11 @@ fun NetHomeCard(
     subtitle: String? = null,
     accentColor: Color = MaterialTheme.colorScheme.primary,
     valueColor: Color = MaterialTheme.colorScheme.onSurface,
-    trailingContent: (@Composable () -> Unit)? = null
+    trailingContent: (@Composable () -> Unit)? = null,
 ) {
     ElevatedCard(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(8.dp),
+            .fillMaxWidth(),
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
@@ -55,12 +55,17 @@ fun NetHomeCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Text(
-                    text = value,
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Bold,
-                    color = valueColor
-                )
+                AnimatedContent(
+                    targetState = value,
+                    label = "animacion_tarjeta_$title"
+                ) { animatedValue ->
+                    Text(
+                        text = animatedValue,
+                        style = MaterialTheme.typography.displaySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = valueColor
+                    )
+                }
                 subtitle?.let {
                     Text(
                         text = it,

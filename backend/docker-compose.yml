@@ -1,5 +1,5 @@
 services:
-  # 1. Base de Datos PostgreSQL (Imagen oficial, nada de Alpine)
+  # 1. Base de Datos PostgreSQL
   postgres_db:
     image: postgres:15
     container_name: nethome_postgres
@@ -21,28 +21,29 @@ services:
     ports:
       - "1883:1883"
     volumes:
-      # Apunta a tu nueva carpeta para leer la configuración
       - ./mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
 
-  # 3. Capa de API (FastAPI) para las peticiones HTTP de Kotlin
-  web_api:
+  # 3. Capa de API (FastAPI)
+  backend_api:
     build: .
     container_name: nethome_api
     restart: always
     ports:
       - "8000:8000"
+    volumes:
+      - .:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
       - postgres_db
       - mqtt_broker
     env_file:
       - .env
 
-  # 4. Capa de IoT (Worker MQTT) en segundo plano para escuchar al ESP32
+  # 4. Capa de IoT (Worker MQTT)
   mqtt_worker:
     build: .
     container_name: nethome_mqtt_worker
     restart: always
-    # Ejecuta el script del módulo mqtt para guardar datos sin bloquear la API
     command: python -u -m mqtt.oyente_mqtt
     depends_on:
       - postgres_db
@@ -51,5 +52,4 @@ services:
       - .env
 
 volumes:
-  # Volumen persistente para que los datos no se borren si reinicias el servidor
   postgres_data:
