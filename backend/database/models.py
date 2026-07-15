@@ -1,12 +1,16 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, Float, String, Text, func
+from sqlalchemy import Column, DateTime, Float, String, Text, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
 class Base(DeclarativeBase):
     pass
 
+class Configuration(Base):
+    __tablename__ = "configuracion"
+    key: Mapped[str] = mapped_column(String(50), primary_key=True)
+    value: Mapped[float] = mapped_column(Float, nullable=False)
 
 class MQTTReading(Base):
     __tablename__ = "mqtt_readings"

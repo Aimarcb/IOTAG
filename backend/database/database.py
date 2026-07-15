@@ -3,9 +3,9 @@ from typing import Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
+from database.models import Configuration
 
 from .models import Base, MQTTReading
-
 
 def _build_database_url() -> str:
     if os.getenv("DATABASE_URL"):
@@ -18,21 +18,30 @@ def _build_database_url() -> str:
     dbname = os.getenv("POSTGRES_DB", "nethome_iot")
     return f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{dbname}"
 
-
 DATABASE_URL = _build_database_url()
 engine = create_engine(DATABASE_URL, pool_pre_ping=True, future=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
-
 
 def init_db() -> bool:
     try:
         Base.metadata.create_all(bind=engine)
         print("✅ Tablas de base de datos creadas o verificadas")
+        
+        db = SessionLocal()
+        try:
+            config = db.query(Configuration).filter(Configuration.key == "precio_kwh").first()
+            if not config:
+                precio_por_defecto = Configuration(key="precio_kwh", value=0.15)
+                db.add(precio_por_defecto)
+                db.commit()
+                print("Valor semilla 'precio_kwh' inyectado: 0.15")
+        finally:
+            db.close()
+
         return True
     except Exception as exc:
         print(f"⚠️ No se pudo inicializar la base de datos: {exc}")
         return False
-
 
 def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()

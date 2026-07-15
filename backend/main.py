@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import APIRouter, FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -7,6 +7,8 @@ from typing import List
 from pydantic import BaseModel
 from ia.ia_manager import procesar_ia
 from datetime import datetime, timedelta
+
+from routers import electricidad
 
 from database.database import get_db, init_db
 from database.models import MQTTReading
@@ -50,6 +52,8 @@ app.add_middleware(
 @app.on_event("startup")
 def startup_event():
     init_db()  # Esto crea las tablas en Postgres si no existen la primera vez
+
+app.include_router(electricidad.router)
 
 @app.get("/")
 def read_root():
@@ -166,4 +170,3 @@ def obtener_historial_ambiental(limite: int = 100, db: Session = Depends(get_db)
             "fecha": l.received_at
         })
     return resultado
-
