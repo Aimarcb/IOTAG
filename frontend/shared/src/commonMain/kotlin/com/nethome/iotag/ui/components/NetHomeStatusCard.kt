@@ -63,7 +63,6 @@ fun NetHomeStatusCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Icono circular grande
             Box(
                 modifier = Modifier
                     .size(48.dp)

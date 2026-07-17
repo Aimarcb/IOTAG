@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.nethome.iotag.data.repository.SensorRepository
 import kotlinx.coroutines.launch
 
-class SettingsViewModel(private val repository: SensorRepository): ViewModel() {
+class SettingsViewModel(private val repository: SensorRepository = SensorRepository()): ViewModel() {
     var precioInput by mutableStateOf("")
     var isLoading by mutableStateOf(false)
     var mensajeResultado by mutableStateOf<String?>(null)

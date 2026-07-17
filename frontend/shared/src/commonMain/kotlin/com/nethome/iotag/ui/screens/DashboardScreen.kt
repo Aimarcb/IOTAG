@@ -2,8 +2,10 @@ package com.nethome.iotag.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -76,7 +78,9 @@ fun DashboardScreen(modifier: Modifier = Modifier) {
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row( modifier = Modifier.fillMaxWidth()
+                    .height(IntrinsicSize.Max),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     NetHomeCard(
                         title = "CONSUMO",
                         value = "${data.consumoKw} ${data.unidadConsumo}",
@@ -85,6 +89,7 @@ fun DashboardScreen(modifier: Modifier = Modifier) {
                         accentColor = Color(0xFF34D399),
                         valueColor = Color(0xFF34D399),
                         modifier = Modifier.weight(1f)
+                            .fillMaxHeight()
                     )
 
                     NetHomeCard(
@@ -93,7 +98,8 @@ fun DashboardScreen(modifier: Modifier = Modifier) {
                         icon = Icons.Default.Thermostat,
                         subtitle = data.tendenciaTemperatura,
                         accentColor = Color(0xFFFBBF24),
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1f)
+                            .fillMaxHeight(),
                         trailingContent = {
                             CircularProgressIndicator(
                                 progress = { 0.7f },

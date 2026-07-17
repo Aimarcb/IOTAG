@@ -63,7 +63,8 @@ fun NetHomeCard(
                         text = animatedValue,
                         style = MaterialTheme.typography.displaySmall,
                         fontWeight = FontWeight.Bold,
-                        color = valueColor
+                        color = valueColor,
+                        maxLines = 1
                     )
                 }
                 subtitle?.let {
