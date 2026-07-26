@@ -47,14 +47,11 @@ fun CanvasBarChart(
     ) {
         val maxWidthDp = maxWidth
 
-        // 1. DEFINICIÓN DE ESPACIOS Y MÁRGENES
         val minWidthPerBarDp = 40.dp
-        val sideMarginDp = 16.dp // Margen idéntico para izquierda y derecha
+        val sideMarginDp = 16.dp
 
-        // El ancho mínimo total necesita incluir las barras y LOS DOS márgenes laterales
         val minRequiredWidthDp = (minWidthPerBarDp * datos.size) + (sideMarginDp * 2)
 
-        // 2. LÓGICA DE SCROLL
         val necesitaScroll = minRequiredWidthDp > maxWidthDp
         val canvasWidthDp = if (necesitaScroll) minRequiredWidthDp else maxWidthDp
 
@@ -65,7 +62,7 @@ fun CanvasBarChart(
                 .then(scrollModifier)
                 .width(canvasWidthDp)
                 .height(250.dp)
-                .padding(vertical = 16.dp) // SÓLO padding vertical, el horizontal lo controlamos con matemáticas
+                .padding(vertical = 16.dp)
         ) {
             val canvasWidth = size.width
             val canvasHeight = size.height
@@ -74,12 +71,10 @@ fun CanvasBarChart(
             val topValueSpace = 20.dp.toPx()
             val maxBarHeight = canvasHeight - bottomLabelSpace - topValueSpace
 
-            // 3. MATEMÁTICA DE SIMETRÍA EXACTA
             val sideMarginPx = sideMarginDp.toPx()
             val availableWidth = canvasWidth - (sideMarginPx * 2)
             val spacePerBar = availableWidth / datos.size
 
-            // La barra ocupa el 60% de su celda, el 40% es espacio entre barras
             val barWidth = spacePerBar * 0.6f
 
             datos.forEachIndexed { index, dato ->
