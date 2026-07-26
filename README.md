@@ -53,5 +53,5 @@ The entire infrastructure is fully containerized. You don't need to install loca
 
 ### 1. Clone the repository
 ```bash
-git clone [https://github.com/YOUR_USERNAME/IOTAG.git](https://github.com/YOUR_USERNAME/IOTAG.git)
+git clone [https://github.com/Aimarcb/IOTAG.git](https://github.com/Aimarcb/IOTAG.git)
 cd IOTAG
