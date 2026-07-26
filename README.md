@@ -26,10 +26,11 @@ This project demonstrates a production-ready approach to IoT data ingestion, rea
 
 ![Architecture Diagram](docs/architecture.png) 
 
-**Data Flow:**
-1. **Hardware Telemetry:** `ESP32 (MQTT)` ➔ `Mosquitto Broker` ➔ `Python Worker` ➔ `PostgreSQL`.
-2. **Client Interaction:** `Kotlin App` ➔ **`Rust Reverse Proxy`** ➔ `FastAPI`. 
-The AI engine sits on top of the API to translate voice commands into MQTT actions.
+**Data Flow Protocols:**
+1. **IoT Telemetry Pipeline (`MQTT`):** `ESP32` ➔ **[MQTT Protocol]** ➔ `Mosquitto Broker` ➔ `Python Worker` ➔ `PostgreSQL`.
+2. **Client Interaction Pipeline (`HTTP / REST`):** `Kotlin App` ➔ **[HTTP / REST]** ➔ `Rust Reverse Proxy` ➔ `FastAPI`. 
+
+*The AI engine sits on top of the API to translate voice commands into actionable MQTT payloads.*
 
 ## 🛠️ Tech Stack
 
@@ -52,5 +53,5 @@ The entire infrastructure is fully containerized. You don't need to install loca
 
 ### 1. Clone the repository
 ```bash
-git clone [https://github.com/YOUR_USERNAME/nethome-iot.git](https://github.com/YOUR_USERNAME/nethome-iot.git)
-cd nethome-iot
+git clone [https://github.com/YOUR_USERNAME/IOTAG.git](https://github.com/YOUR_USERNAME/IOTAG.git)
+cd IOTAG
